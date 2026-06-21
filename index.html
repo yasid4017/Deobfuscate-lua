@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WeAreDevs Deobfuscator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: #161b22;
+            border-radius: 16px;
+            padding: 30px 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            border: 1px solid #30363d;
+        }
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h1 span {
+            background: #238636;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 2px 12px;
+            border-radius: 20px;
+            color: #fff;
+            letter-spacing: 0.3px;
+        }
+        .sub {
+            color: #8b949e;
+            margin-bottom: 24px;
+            font-size: 15px;
+            border-left: 3px solid #238636;
+            padding-left: 14px;
+        }
+        textarea {
+            width: 100%;
+            padding: 14px 16px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            color: #e6edf3;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 180px;
+            transition: border 0.2s;
+            line-height: 1.6;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+        }
+        textarea::placeholder {
+            color: #484f58;
+        }
+        textarea[readonly] {
+            background: #0d1117;
+            cursor: default;
+        }
+        .row {
+            display: flex;
+            gap: 16px;
+            margin: 18px 0 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .row .label {
+            font-size: 14px;
+            color: #8b949e;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .row .label .badge {
+            background: #21262d;
+            padding: 0 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #8b949e;
+        }
+        .file-upload {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .file-upload label {
+            background: #21262d;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #30363d;
+            font-size: 14px;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .file-upload label:hover {
+            background: #30363d;
+        }
+        .file-upload input[type="file"] {
+            display: none;
+        }
+        .file-upload .file-name {
+            color: #8b949e;
+            font-size: 13px;
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        button {
+            background: #238636;
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 10px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #2ea043;
+        }
+        button:hover {
+            background: #2ea043;
+        }
+        button:active {
+            transform: scale(0.97);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        button.secondary {
+            background: #21262d;
+            border-color: #30363d;
+        }
+        button.secondary:hover {
+            background: #30363d;
+        }
+        .error {
+            color: #f85149;
+            background: #2d1b1e;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+            border: 1px solid #f85149;
+            display: none;
+            font-size: 14px;
+        }
+        .error.show {
+            display: block;
+        }
+        .status {
+            font-size: 14px;
+            color: #8b949e;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .status .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #30363d;
+            border-top-color: #58a6ff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        .status .spinner.active {
+            display: inline-block;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .footer {
+            margin-top: 20px;
+            border-top: 1px solid #21262d;
+            padding-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 13px;
+            color: #484f58;
+        }
+        .footer a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .copy-btn {
+            background: transparent;
+            border: 1px solid #30363d;
+            color: #8b949e;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .copy-btn:hover {
+            background: #21262d;
+            color: #e6edf3;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 18px 14px;
+            }
+            h1 {
+                font-size: 20px;
+                flex-wrap: wrap;
+            }
+            textarea {
+                min-height: 140px;
+                font-size: 13px;
+                padding: 12px;
+            }
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+            .row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .file-upload {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .file-upload .file-name {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>
+            🔓 WeAreDevs Deobfuscator
+            <span>Lua</span>
+        </h1>
+        <div class="sub">
+            Tempelkan script Lua yang di-obfuscate, atau <strong>upload file .lua</strong>.
+        </div>
+
+        <div class="file-upload" style="margin-bottom: 12px;">
+            <label for="fileInput">📂 Pilih file .lua</label>
+            <input type="file" id="fileInput" accept=".lua,.txt" />
+            <span class="file-name" id="fileName">Tidak ada file dipilih</span>
+        </div>
+
+        <textarea id="input" placeholder="-- Tempel script obfuscated di sini ...&#10;return(function(...)local v={...} ... end)(...)"></textarea>
+
+        <div class="row">
+            <div class="label">
+                ⚡ Output
+                <span class="badge">deobfuscated</span>
+            </div>
+            <div style="flex:1; min-width:80px;"></div>
+            <button id="deobfBtn">▶ Deobfuscate</button>
+            <button id="clearBtn" class="secondary">✕ Clear</button>
+        </div>
+
+        <textarea id="output" readonly placeholder="Hasil deobfuscation akan muncul di sini ..."></textarea>
+
+        <div class="status">
+            <span class="spinner" id="spinner"></span>
+            <span id="statusText">Siap</span>
+            <button class="copy-btn" id="copyBtn" style="margin-left:auto;">📋 Salin</button>
+        </div>
+
+        <div class="error" id="error"></div>
+
+        <div class="footer">
+            <span>Untuk script hasil <strong>WeAreDevs Obfuscator</strong></span>
+            <span>Deploy via Vercel · <a href="#" onclick="location.reload()">⟳ Refresh</a></span>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const input = document.getElementById('input');
+            const output = document.getElementById('output');
+            const deobfBtn = document.getElementById('deobfBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const errorEl = document.getElementById('error');
+            const statusText = document.getElementById('statusText');
+            const spinner = document.getElementById('spinner');
+            const fileInput = document.getElementById('fileInput');
+            const fileName = document.getElementById('fileName');
+
+            function setStatus(text, loading = false) {
+                statusText.textContent = text;
+                spinner.classList.toggle('active', loading);
+            }
+
+            function showError(msg) {
+                if (msg) {
+                    errorEl.textContent = msg;
+                    errorEl.classList.add('show');
+                } else {
+                    errorEl.classList.remove('show');
+                }
+            }
+
+            // --- Upload file ---
+            fileInput.addEventListener('change', function(e) {
+                const file = this.files[0];
+                if (!file) {
+                    fileName.textContent = 'Tidak ada file dipilih';
+                    return;
+                }
+                fileName.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    input.value = ev.target.result;
+                    setStatus('File dimuat, siap di-deobfuscate');
+                    showError(null);
+                };
+                reader.onerror = function() {
+                    showError('Gagal membaca file.');
+                };
+                reader.readAsText(file);
+            });
+
+            // --- Deobfuscate ---
+            async function deobfuscate() {
+                const script = input.value.trim();
+                if (!script) {
+                    showError('Silakan tempelkan script atau upload file .lua.');
+                    return;
+                }
+                showError(null);
+                output.value = '';
+                deobfBtn.disabled = true;
+                setStatus('Mendekobfuskasi ...', true);
+
+                try {
+                    const resp = await fetch('/api/deobfuscate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: script,
+                    });
+
+                    const data = await resp.json();
+
+                    if (!resp.ok) {
+                        throw new Error(data.error || 'Gagal mendekobfuskasi');
+                    }
+
+                    const result = data.result || '';
+                    output.value = result;
+                    setStatus(result ? '✓ Selesai' : '⚠️ Tidak ada output');
+                    if (!result) {
+                        setStatus('⚠️ Script tidak menghasilkan output (mungkin bukan obfuscated WeAreDevs)');
+                    }
+                } catch (err) {
+                    showError(err.message || 'Terjadi kesalahan pada server.');
+                    setStatus('✗ Gagal');
+                } finally {
+                    deobfBtn.disabled = false;
+                    spinner.classList.remove('active');
+                }
+            }
+
+            function clearAll() {
+                input.value = '';
+                output.value = '';
+                showError(null);
+                setStatus('Siap');
+                fileInput.value = '';
+                fileName.textContent = 'Tidak ada file dipilih';
+                input.focus();
+            }
+
+            async function copyOutput() {
+                const text = output.value;
+                if (!text) {
+                    setStatus('Tidak ada output untuk disalin');
+                    return;
+                }
+                try {
+                    await navigator.clipboard.writeText(text);
+                    setStatus('✓ Disalin ke clipboard!');
+                    setTimeout(() => setStatus('Siap'), 1500);
+                } catch {
+                    output.select();
+                    document.execCommand('copy');
+                    setStatus('✓ Disalin!');
+                    setTimeout(() => setStatus('Siap'), 1500);
+                }
+            }
+
+            // Event listeners
+            deobfBtn.addEventListener('click', deobfuscate);
+            clearBtn.addEventListener('click', clearAll);
+            copyBtn.addEventListener('click', copyOutput);
+
+            // Ctrl+Enter shortcut
+            input.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    deobfuscate();
+                }
+            });
+
+            // Auto-focus
+            input.focus();
+
+            // Jika ada contoh di URL hash
+            if (location.hash) {
+                try {
+                    const example = decodeURIComponent(location.hash.slice(1));
+                    if (example.trim()) input.value = example;
+                } catch (_) {}
+            }
+        })();
+    </script>
+
+</body>
+</html>
